@@ -1,0 +1,22 @@
+﻿@model Weather.WebUI.Models.WeatherViewModel
+
+<tr>
+    <td>@Model.CityName</td>
+    <td>@Model.Country</td>
+    <td>@(Math.Round(Model.Temperature - 273.15, 0)) &#186;C</td>
+    <td>@Model.Humidity %</td>
+    <td>
+        @using (Html.BeginForm("Histogram", "Weather"))
+        {
+            @Html.HiddenFor(x => x.CityID)
+            <input type="submit" class="btn btn-primary" value="Pokaż wykres" />
+        }
+    </td>
+    <td>
+        @using (Html.BeginForm("DeleteCity", "City", FormMethod.Post, new { onsubmit = "return confirm('Usunąć z obserwowanych?');" }))
+        {
+            @Html.HiddenFor(x => x.CityID)
+            <input type="submit" class="btn btn-danger" value="Usuń" />
+        }
+    </td>
+</tr>

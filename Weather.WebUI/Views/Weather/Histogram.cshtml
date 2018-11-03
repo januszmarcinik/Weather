@@ -1,0 +1,15 @@
+﻿@model Weather.WebUI.Models.HistogramViewModel
+
+@{
+    ViewBag.Title = "Wykresy temperatury i wilgotności";
+}
+
+<h1 class="text-center">Wykresy z histogramu dla miejscowości: @Model.City</h1>
+<div>
+    @Model.TemperatureChart
+</div>
+<br /><br />
+<div>
+    @Model.HumidityChart
+</div>
+<br /><br /><br />

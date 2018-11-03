@@ -1,0 +1,32 @@
+﻿@model List<Weather.WebUI.Models.WeatherViewModel>
+
+@{
+    ViewBag.Title = "Obserwowane miasta";
+}
+
+@if (Model.Count() == 0)
+{
+    <h1 class="text-center"><span class="label label-info">Aktualnie nie obserwujesz żadnych miast</span></h1>
+}
+else
+{
+    <h1 class="text-center">Obserwowane miasta:</h1>
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <table class="table table-hover text-center">
+                <tr class="active">
+                    <th class="text-center">Miasto</th>
+                    <th class="text-center">Kraj</th>
+                    <th class="text-center">Temperatura</th>
+                    <th class="text-center">Wilgotność</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+                @foreach (var city in Model)
+                {
+                    @Html.Partial("WeatherSummary", city)
+                }
+            </table>
+        </div>
+    </div>
+}
