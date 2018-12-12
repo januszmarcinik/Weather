@@ -13,7 +13,7 @@ else
     <div class="list-group text-center">
         @foreach (var city in Model)
         {
-            @Html.ActionLink(city.Name, "AddNewCity", "City", new { name = city.Name, country = city.Country, id = city._Id }, new { @class = "list-group-item" });
+            @Html.ActionLink($"{city.Name} [{city.Country}]", "AddNewCity", "City", new { name = city.Name, country = city.Country, id = city._Id }, new { @class = "list-group-item" });
         }
     </div>
 }

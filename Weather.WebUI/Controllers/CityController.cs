@@ -11,9 +11,6 @@ namespace Weather.WebUI.Controllers
 {
     public class CityController : MyCustomController
     {
-        private readonly ICityRepository _cityRepository;
-        private readonly IExternalApiWeatherService _externalApiWeatherService;
-
         public CityController(IWeatherRepository weatherRepo, ICityRepository cityRepository, IExternalApiWeatherService externalApiWeatherService) 
             : base(weatherRepo)
         {
@@ -56,6 +53,11 @@ namespace Weather.WebUI.Controllers
 
         public List<CityJsonViewModel> GetAllCities()
         {
+            if (_allCitiesCache != null && _allCitiesCache.Count > 0)
+            {
+                return _allCitiesCache;
+            }
+
             var allCities = new List<CityJsonViewModel>();
             var citiesListJson = new StreamReader(Server.MapPath(Url.Content("~/Json/city.list.json")));
             string line;
@@ -68,8 +70,16 @@ namespace Weather.WebUI.Controllers
                 }
             }
 
-            return allCities;
-            //List<City> DistinctCities = allCities.GroupBy(x => x.Name).Select(x => x.First()).ToList();
+            _allCitiesCache = allCities
+                .GroupBy(x => x.Name)
+                .Select(x => x.First())
+                .ToList();
+
+            return _allCitiesCache;
         }
+
+        private readonly ICityRepository _cityRepository;
+        private readonly IExternalApiWeatherService _externalApiWeatherService;
+        private static List<CityJsonViewModel> _allCitiesCache;
     }
 }
