@@ -39,19 +39,6 @@
                     <input type="text" class="form-control" placeholder="Miasto do obserwacji" name="search">
                     <input type="submit" class="btn btn-default" value="Wyszukaj" />
                 }
-                <ul class="nav navbar-nav navbar-right">
-                    @if (Session["User"] != null)
-                    {
-                        <li class="navbar-right"><a href="@Url.Action("Logout", "User")">Wyloguj się</a></li>
-                        <li class="navbar-right navbar-text">Zalogowany jako: <strong>@ViewBag.UserName</strong></li>
-
-                    }
-                    else
-                    {
-                        <li class="navbar-right"><a href="@Url.Action("SignUp", "User")">Zarejestruj się</a></li>
-                        <li class="navbar-right"><a href="@Url.Action("Login", "User")">Zaloguj się</a></li>
-                    }
-                </ul>
             </div>
         </div>
     </nav>
@@ -68,9 +55,8 @@
 
     <script>
         setInterval(function () { reloadPage() }, 600000);
-        function reloadPage()
-        {
-            window.location = location.href
+        function reloadPage() {
+            window.location = location.href;
         }
     </script>
 </body>

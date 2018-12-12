@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Web.Mvc;
 using Weather.Domain.Abstract;
 using Weather.Domain.Concrete;
+using Weather.WebUI.Services;
 
 namespace Weather.WebUI.Infrastructure
 {
@@ -29,7 +30,7 @@ namespace Weather.WebUI.Infrastructure
 
         private void AddBindings()
         {
-            kernel.Bind<IUserRepository>().To<EFUserRepository>();
+            kernel.Bind<IExternalApiWeatherService>().To<OpenWeatherMapService>();
             kernel.Bind<ICityRepository>().To<EFCityRepository>();
             kernel.Bind<IWeatherRepository>().To<EFWeatherRepository>();
         }

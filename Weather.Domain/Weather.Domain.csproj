@@ -50,14 +50,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstract\ICityRepository.cs" />
-    <Compile Include="Abstract\IUserRepository.cs" />
     <Compile Include="Abstract\IWeatherRepository.cs" />
     <Compile Include="Concrete\EFWeatherRepository.cs" />
     <Compile Include="Concrete\EFCityRepository.cs" />
     <Compile Include="Concrete\EFDbContext.cs" />
-    <Compile Include="Concrete\EFUserRepository.cs" />
     <Compile Include="Entities\City.cs" />
-    <Compile Include="Entities\User.cs" />
     <Compile Include="Entities\WeatherReading.cs" />
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

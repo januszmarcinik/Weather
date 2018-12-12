@@ -1,41 +1,37 @@
 ﻿using System;
 using System.Linq;
 using System.Web.Mvc;
-using Weather.Domain.Entities;
 using Weather.Domain.Abstract;
-using System.Web.Routing;
 
 namespace Weather.WebUI.Controllers
 {
     public class MyCustomController : Controller
     {
         protected bool IsWeatherActual = true;
-        private IWeatherRepository weatherRepository;
+        private readonly IWeatherRepository _weatherRepository;
 
         public MyCustomController(IWeatherRepository weatherRepo)
         {
-            weatherRepository = weatherRepo;
+            _weatherRepository = weatherRepo;
         }
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             base.OnActionExecuting(filterContext);
 
-            if ((User)Session["User"] == null)
+            var latestWeatherReading = _weatherRepository.WeatherReadings.OrderByDescending(x => x.Date).FirstOrDefault()?.Date;
+            if (latestWeatherReading.HasValue == false)
             {
-                filterContext.Result = new RedirectToRouteResult(new RouteValueDictionary(new { controller = "User", action = "Login" }));
-            }
-            else
-            {
-                User user = (User)Session["User"];
-                ViewBag.UserName = user.Login;
+                IsWeatherActual = false;
+                return;
             }
 
-            DateTime latestWeatherReading = weatherRepository.WeatherReadings.OrderByDescending(x => x.Date).FirstOrDefault().Date;
-            DateTime dateNow = DateTime.Now;
-            TimeSpan timeSpan = dateNow - latestWeatherReading;
+            var dateNow = DateTime.Now;
+            var timeSpan = dateNow - latestWeatherReading.Value;
             if (timeSpan.TotalMinutes > 10)
+            {
                 IsWeatherActual = false;
+            }
         }
     }
 }

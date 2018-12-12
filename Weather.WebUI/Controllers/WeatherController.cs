@@ -2,65 +2,76 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
-using System.Web.Script.Serialization;
 using Weather.WebUI.Models;
 using Weather.Domain.Entities;
 using Weather.Domain.Abstract;
-using System.Net;
 using DotNet.Highcharts;
 using DotNet.Highcharts.Enums;
 using DotNet.Highcharts.Helpers;
 using DotNet.Highcharts.Options;
 using System.Drawing;
+using Weather.WebUI.Services;
 
 namespace Weather.WebUI.Controllers
 {
     public class WeatherController : MyCustomController
     {
-        private IUserRepository userRepository;
-        private IWeatherRepository weatherRepository;
+        private readonly IWeatherRepository _weatherRepository;
+        private readonly ICityRepository _cityRepository;
+        private readonly IExternalApiWeatherService _externalApiWeatherService;
 
-        public WeatherController(IUserRepository userRepo, IWeatherRepository weatherRepo) : base(weatherRepo)
+        public WeatherController(IWeatherRepository weatherRepo, ICityRepository cityRepository, IExternalApiWeatherService externalApiWeatherService) 
+            : base(weatherRepo)
         {
-            userRepository = userRepo;
-            weatherRepository = weatherRepo;
+            _weatherRepository = weatherRepo;
+            _cityRepository = cityRepository;
+            _externalApiWeatherService = externalApiWeatherService;
         }
 
         public ViewResult Index()
         {
+            var cities = _cityRepository
+                .Cities
+                .ToList();
+
             if (!IsWeatherActual)
             {
-                UpdateWeather();
+                cities.ForEach(_externalApiWeatherService.DownloadCityWeather);
                 IsWeatherActual = true;
             }
-                
-            User user = (User)Session["User"];
-            IEnumerable<WeatherReading> WeatherReadings = weatherRepository.WeatherReadings.OrderByDescending(x => x.Date);
-            List<WeatherViewModel> model = new List<WeatherViewModel>();
-            foreach (var city in user.Cities)
-            {
-                WeatherReading weather = WeatherReadings.FirstOrDefault(x => x.CityID == city.CityID);
-                if (weather != null)
-                {
-                    WeatherViewModel singleModel = new WeatherViewModel()
+
+            var weatherReadings = _weatherRepository
+                .WeatherReadings
+                .GroupBy(group => group.CityID)
+                .Select(x => x
+                    .OrderByDescending(g => g.Date)
+                    .FirstOrDefault()
+                )
+                .ToList();
+
+            var model = cities
+                .Join(
+                    weatherReadings,
+                    city => city.Id,
+                    weatherReading => weatherReading.CityID,
+                    (city, weatherReading) => new WeatherViewModel
                     {
-                        CityID = city.CityID,
+                        CityID = city.Id,
                         CityName = city.Name,
                         Country = city.Country,
-                        Temperature = weather.Temperature,
-                        Humidity = weather.Humidity
-                    };
-                    model.Add(singleModel);
-                }
-            }
+                        Temperature = weatherReading.Temperature,
+                        Humidity = weatherReading.Humidity
+                    }
+                )
+                .ToList();
+
             return View(model);
         }
 
-        public ViewResult Histogram(int cityID)
+        public ViewResult Histogram(int cityId)
         {
-            User user = (User)Session["User"];
-            City city = user.Cities.FirstOrDefault(x => x.CityID == cityID);
-            IEnumerable<WeatherReading> weatherReadings = weatherRepository.WeatherReadings.Where(x => x.CityID == cityID);
+            var city = _cityRepository.Cities.SingleOrDefault(x => x.Id == cityId);
+            IEnumerable<WeatherReading> weatherReadings = _weatherRepository.WeatherReadings.Where(x => x.CityID == cityId);
 
             double[] temperatureDataKelwin = weatherReadings.Select(x => x.Temperature).ToArray();
             for (int i = 0; i < temperatureDataKelwin.Length; i++)
@@ -138,35 +149,6 @@ namespace Weather.WebUI.Controllers
             };
 
             return View(model);
-        }
-
-        public void UpdateWeather()
-        {
-            User user = (User)Session["User"];
-            foreach(var city in user.Cities)
-            {
-                DownloadCityWeather(city);
-            }
-        }
-
-        public void DownloadCityWeather(City city)
-        {
-            DateTime start = DateTime.Now;
-            string url = string.Format("http://api.openweathermap.org/data/2.5/weather?APPID=75a3e7d73376fa1ae08a542ca103899a&id={0}", city._Id);
-            WebClient client = new WebClient();
-            string json = client.DownloadString(url);
-            JsonViewModel jsonModel = new JavaScriptSerializer().Deserialize<JsonViewModel>(json);
-            WeatherReading weather = new WeatherReading()
-            {
-                CityID = city.CityID,
-                Temperature = jsonModel.Main.Temp,
-                Humidity = jsonModel.Main.Humidity,
-                Date = DateTime.Now
-            };
-            weatherRepository.AddWeatherReading(weather);
-            DateTime stop = DateTime.Now;
-            TimeSpan timeSpan = start - stop;
-            double seconds = timeSpan.TotalSeconds;
         }
     }
 }
