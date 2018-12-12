@@ -3,19 +3,18 @@ using System.Linq;
 using System.Web.Mvc;
 using System.Web.Script.Serialization;
 using System.IO;
+using Hangfire;
 using Weather.Domain.Abstract;
+using Weather.WebUI.Jobs;
 using Weather.WebUI.Models;
-using Weather.WebUI.Services;
 
 namespace Weather.WebUI.Controllers
 {
-    public class CityController : MyCustomController
+    public class CityController : Controller
     {
-        public CityController(IWeatherRepository weatherRepo, ICityRepository cityRepository, IExternalApiWeatherService externalApiWeatherService) 
-            : base(weatherRepo)
+        public CityController(IWeatherRepository weatherRepo, ICityRepository cityRepository)
         {
             _cityRepository = cityRepository;
-            _externalApiWeatherService = externalApiWeatherService;
         }
 
         public ActionResult SearchCity(string search = null)
@@ -39,7 +38,7 @@ namespace Weather.WebUI.Controllers
                 return RedirectToAction("Index", "Weather");
 
             var city = _cityRepository.Add(id, name, country);
-            _externalApiWeatherService.DownloadCityWeather(city);
+            BackgroundJob.Enqueue<ReadActualWeatherForOneCityJob>(x => x.Run(city));
 
             return RedirectToAction("Index", "Weather");
         }
@@ -79,7 +78,6 @@ namespace Weather.WebUI.Controllers
         }
 
         private readonly ICityRepository _cityRepository;
-        private readonly IExternalApiWeatherService _externalApiWeatherService;
         private static List<CityJsonViewModel> _allCitiesCache;
     }
 }

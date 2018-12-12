@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Web.Mvc;
+using Hangfire;
 using Weather.Domain.Abstract;
 using Weather.Domain.Concrete;
 using Weather.WebUI.Services;
@@ -16,6 +17,7 @@ namespace Weather.WebUI.Infrastructure
         {
             kernel = kernelParam;
             AddBindings();
+            GlobalConfiguration.Configuration.UseNinjectActivator(kernel);
         }
 
         public object GetService(Type serviceType)

@@ -10,22 +10,18 @@ using DotNet.Highcharts.Enums;
 using DotNet.Highcharts.Helpers;
 using DotNet.Highcharts.Options;
 using System.Drawing;
-using Weather.WebUI.Services;
 
 namespace Weather.WebUI.Controllers
 {
-    public class WeatherController : MyCustomController
+    public class WeatherController : Controller
     {
         private readonly IWeatherRepository _weatherRepository;
         private readonly ICityRepository _cityRepository;
-        private readonly IExternalApiWeatherService _externalApiWeatherService;
 
-        public WeatherController(IWeatherRepository weatherRepo, ICityRepository cityRepository, IExternalApiWeatherService externalApiWeatherService) 
-            : base(weatherRepo)
+        public WeatherController(IWeatherRepository weatherRepo, ICityRepository cityRepository) 
         {
             _weatherRepository = weatherRepo;
             _cityRepository = cityRepository;
-            _externalApiWeatherService = externalApiWeatherService;
         }
 
         public ViewResult Index()
@@ -33,12 +29,6 @@ namespace Weather.WebUI.Controllers
             var cities = _cityRepository
                 .Cities
                 .ToList();
-
-            if (!IsWeatherActual)
-            {
-                cities.ForEach(_externalApiWeatherService.DownloadCityWeather);
-                IsWeatherActual = true;
-            }
 
             var weatherReadings = _weatherRepository
                 .WeatherReadings
