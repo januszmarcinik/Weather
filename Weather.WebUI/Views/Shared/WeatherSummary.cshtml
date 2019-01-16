@@ -3,7 +3,7 @@
 <tr>
     <td>@Model.CityName</td>
     <td>@Model.Country</td>
-    <td>@(Math.Round(Model.Temperature - 273.15, 0)) &#186;C</td>
+    <td>@Model.Temperature &#186;C</td>
     <td>@Model.Humidity %</td>
     <td>
         @using (Html.BeginForm("Histogram", "Weather"))

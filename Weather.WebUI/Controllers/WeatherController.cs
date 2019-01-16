@@ -10,6 +10,7 @@ using DotNet.Highcharts.Enums;
 using DotNet.Highcharts.Helpers;
 using DotNet.Highcharts.Options;
 using System.Drawing;
+using Weather.WebUI.Helpers;
 
 namespace Weather.WebUI.Controllers
 {
@@ -26,35 +27,7 @@ namespace Weather.WebUI.Controllers
 
         public ViewResult Index()
         {
-            var cities = _cityRepository
-                .Cities
-                .ToList();
-
-            var weatherReadings = _weatherRepository
-                .WeatherReadings
-                .GroupBy(group => group.CityID)
-                .Select(x => x
-                    .OrderByDescending(g => g.Date)
-                    .FirstOrDefault()
-                )
-                .ToList();
-
-            var model = cities
-                .Join(
-                    weatherReadings,
-                    city => city.Id,
-                    weatherReading => weatherReading.CityID,
-                    (city, weatherReading) => new WeatherViewModel
-                    {
-                        CityID = city.Id,
-                        CityName = city.Name,
-                        Country = city.Country,
-                        Temperature = weatherReading.Temperature,
-                        Humidity = weatherReading.Humidity
-                    }
-                )
-                .ToList();
-
+            var model = WeatherPreviewHelper.GetForAllCities(_weatherRepository, _cityRepository);
             return View(model);
         }
 

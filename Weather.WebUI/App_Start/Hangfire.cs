@@ -15,7 +15,7 @@ namespace Weather.WebUI
             app.UseHangfireDashboard();
             app.UseHangfireServer();
 
-            RecurringJob.AddOrUpdate<ReadActualWeatherForAllCitiesJob>(x => x.Run(), Cron.Hourly);
+            RecurringJob.AddOrUpdate<ReadActualWeatherForAllCitiesJob>(x => x.Run(), Cron.Daily);
         }
     }
 }
